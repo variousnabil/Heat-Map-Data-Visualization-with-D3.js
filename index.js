@@ -76,10 +76,13 @@ const datasetReady = (response) => {
         .attr('fill', d => {
             const temp = Number(baseTemp) + d.variance;
             if (temp < 5) return colors.darkBlue;
-            if (temp < 8) return colors.softBlue;
-            if (temp < 11) return colors.yellow;
-            if (temp >= 11) return colors.red;
-        });
+            if (temp < 7.2) return colors.softBlue;
+            if (temp < 10.6) return colors.yellow;
+            if (temp >= 10.6) return colors.red;
+        })
+        .attr('data-month', d => d.month > 11 ? 11 : d.month)
+        .attr('data-year', d => d.year)
+        .attr('data-temp', d => Number(baseTemp) + d.variance);
 }
 
 axios.get(url).then(datasetReady).catch((err) => console.log('error axios: ', err));
