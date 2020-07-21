@@ -43,7 +43,7 @@ const datasetReady = (response) => {
         .call(xAxis);
 
     const monthMinMax = d3.extent(monthlyVariance, d => {
-        const month = String(d.month).length === 1 ? `0${d.month}` : String(d.month);
+        const month = String(d.month).length === 1 ? `0${d.month}` : d.month;
         return new Date(`2020-${month}-01T00:00:00`);
     });
 
