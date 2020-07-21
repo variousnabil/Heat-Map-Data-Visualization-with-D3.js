@@ -39,18 +39,21 @@ const datasetReady = (response) => {
     const xAxis = d3.axisBottom(xScale);
     svg.append('g')
         .attr('id', 'x-axis')
-        .attr('transform', `translate(0, ${h - margin.bottom * 5})`)
+        .attr('transform', `translate(${margin.left / 2}, ${h - margin.bottom * 5})`)
         .call(xAxis);
 
-    const monthMinMax = [1, 13];
+    const monthMinMax = d3.extent(monthlyVariance, d => {
+        const month = String(d.month).length === 1 ? `0${d.month}` : String(d.month);
+        return new Date(`2020-${month}-01T00:00:00`);
+    });
+
     console.log(monthMinMax)
-    const yScale = d3.scaleLinear().domain(monthMinMax).range([margin.top * 2.5, h - margin.bottom * 5]);
-    const yAxis = d3.axisLeft(yScale);
+    const yScale = d3.scaleTime().domain(monthMinMax).range([margin.top * 2.5, h - margin.bottom * 5]);
+    const yAxis = d3.axisLeft(yScale).tickFormat(d => d3.timeFormat('%B')(d));
     svg.append('g')
         .attr('id', 'y-axis')
-        .attr('transform', `translate(${margin.left}, 0)`)
+        .attr('transform', `translate(${margin.left * 1.5}, 0)`)
         .call(yAxis);
-    // const yScale = 
 
 }
 
