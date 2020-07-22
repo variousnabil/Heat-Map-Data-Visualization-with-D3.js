@@ -80,9 +80,35 @@ const datasetReady = (response) => {
             if (temp < 10.6) return colors.yellow;
             if (temp >= 10.6) return colors.red;
         })
-        .attr('data-month', d => d.month > 11 ? 11 : d.month)
-        .attr('data-year', d => d.year)
+        .attr('data-month', (d, i) => monthData[i].getMonth())
+        .attr('data-year', (d, i) => yearData[i].getFullYear())
         .attr('data-temp', d => Number(baseTemp) + d.variance);
+
+    // colors description
+    let colorIndex = [0, 1, 2, 3];
+    const legend = svg.append('g').attr('id', 'legend').attr('transform', `translate(${margin.left - 28}, ${h - margin.bottom * 3})`);
+    const colorScale = d3.scaleLinear().domain([0, 4]).range([margin.left, margin.left * 5]);
+    const colorAxis = d3.axisBottom(colorScale).tickValues(colorIndex).tickFormat((d, i) => '');
+    legend.append('g').attr('transform', `translate(0, 29)`).call(colorAxis);
+    legend.selectAll('rect')
+        .data(colorIndex)
+        .enter()
+        .append('rect')
+        .attr('x', d => colorScale(d))
+        .attr('height', 28)
+        .attr('width', 60)
+        .attr('fill', d => {
+            switch (d) {
+                case 0: return colors.darkBlue;
+                case 1: return colors.softBlue;
+                case 2: return colors.yellow;
+                case 3: return colors.red;
+            }
+        });
+    legend.append('text').attr('x', 110).attr('y', 49).text('5.0');
+    legend.append('text').attr('x', 170).attr('y', 49).text('7.2');
+    legend.append('text').attr('x', 225).attr('y', 49).text('10.6');
+
 }
 
 axios.get(url).then(datasetReady).catch((err) => console.log('error axios: ', err));
