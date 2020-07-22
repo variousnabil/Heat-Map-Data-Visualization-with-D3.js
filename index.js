@@ -21,6 +21,29 @@ const svg = d3.select('.container')
     .attr('height', h)
     .style('border', '1px solid black')
 
+// tooltip (best practice: it's better to use element outside svg like div to make a tooltip)
+const tooltip = d3.select('body').append('div')
+    .attr('id', 'tooltip')
+    .style('visibility', 'hidden')
+    .style('height', 90)
+    .style('width', 125)
+    .style('background-color', 'black')
+    .style('opacity', 0.7)
+    .style('border', '1px solid black')
+    .style('border-radius', '8px')
+    .style('color', 'white')
+    .style('text-align', 'center')
+    .style('display', 'flex')
+    .style('align-items', 'center')
+    .style('justify-content', 'center')
+    .style('padding', '4px 2px')
+    .style('line-height', '21px')
+    .style('position', 'absolute')
+    .style('top', '0px')
+    .style('left', '0px')
+    .attr('data-year', '1969')
+    .html(`1879, March<br>7.4 C<br>-1.4 C`);
+
 const datasetReady = (response) => {
     const { baseTemperature, monthlyVariance } = response.data;
     const baseTemp = baseTemperature.toFixed(1);
@@ -68,6 +91,7 @@ const datasetReady = (response) => {
         .data(monthlyVariance)
         .enter()
         .append('rect')
+        .attr('id', (d, i) => 'rect' + i)
         .attr('class', 'cell')
         .attr('height', '36px')
         .attr('width', '3px')
@@ -82,7 +106,26 @@ const datasetReady = (response) => {
         })
         .attr('data-month', (d, i) => monthData[i].getMonth())
         .attr('data-year', (d, i) => yearData[i].getFullYear())
-        .attr('data-temp', d => Number(baseTemp) + d.variance);
+        .attr('data-temp', d => Number(baseTemp) + d.variance)
+        .on('mouseover', (d, i) => {
+            const hoveredRect = d3.select('#rect' + i);
+            let year = hoveredRect.attr('data-year');
+            let month = d3.timeFormat('%B')(monthData[i]);
+            let variance = d.variance;
+            let temp = hoveredRect.attr('data-temp');
+            tooltip.style('visibility', 'visible')
+                .style('top', d3.event.pageY - 50)
+                .style('left', d3.event.pageX + 8)
+                .attr('data-year', year)
+                .html(`${year}, ${month}<br>${Number(temp).toFixed(1)}°C<br>${Number(variance).toFixed(1)}°C`);
+            d3.select('#rect' + i).style('stroke', 'black');
+        })
+        .on('mouseout', (d, i) => {
+            tooltip.style('visibility', 'hidden')
+                .style('top', '0px')
+                .style('left', '0px');
+            d3.select('#rect' + i).style('stroke', '');
+        });
 
     // colors description
     let colorIndex = [0, 1, 2, 3];
@@ -108,7 +151,6 @@ const datasetReady = (response) => {
     legend.append('text').attr('x', 110).attr('y', 49).text('5.0');
     legend.append('text').attr('x', 170).attr('y', 49).text('7.2');
     legend.append('text').attr('x', 225).attr('y', 49).text('10.6');
-
 }
 
 axios.get(url).then(datasetReady).catch((err) => console.log('error axios: ', err));
